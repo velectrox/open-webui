@@ -259,6 +259,12 @@ async def chat_completion_tools_handler(
         log.debug(f"{response=}")
         content = await get_content_from_response(response)
         log.debug(f"{content=}")
+        if content[0] == "<":
+            # Probably reasoning model, skip the "<think></think>" tags.
+            # Thoughts might contain JSON objects that are not meant
+            # to be executed.
+            tag = "</" + content[1:content.find(">") + 1]
+            content = content[content.find(tag) + len(tag):]
 
         if not content:
             return body, {}
